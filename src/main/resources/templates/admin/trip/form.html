@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Thêm chuyến</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+</head>
+
+<body style="background:#f4f8fb;">
+
+<div class="container">
+
+    <div class="card shadow mt-5 mx-auto"
+         style="max-width:650px; border-radius:15px;">
+
+        <div class="card-body p-4">
+
+            <a href="/admin/trips"
+               class="btn btn-secondary mb-3">
+
+                ← Quay lại
+
+            </a>
+
+            <h3 class="mb-4">Thêm chuyến xe</h3>
+
+            <form>
+
+                <div class="form-group">
+
+                    <label>Tuyến đường</label>
+
+                    <select class="form-control">
+
+                        <option>Hà Nội → Đà Nẵng</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Xe</label>
+
+                    <select class="form-control">
+
+                        <option>51A-12345</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Giờ khởi hành</label>
+
+                    <input type="datetime-local"
+                           class="form-control">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Giá vé</label>
+
+                    <input type="number"
+                           class="form-control">
+
+                </div>
+
+                <button class="btn btn-primary btn-block">
+
+                    Lưu chuyến xe
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

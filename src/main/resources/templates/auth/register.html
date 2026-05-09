@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký - Bus Ticket Pro</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f4f8fb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .register-box {
+            max-width: 650px;
+            margin: auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .form-control {
+            height: 45px;
+            border-radius: 10px;
+        }
+
+        .btn-register {
+            background: #0d6efd;
+            border: none;
+            height: 45px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .btn-register:hover {
+            background: #0b5ed7;
+        }
+
+        a {
+            color: #0d6efd;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        .error-message{
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .input-error{
+            border: 1px solid #dc3545 !important;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="register-box">
+
+        <div class="card shadow">
+
+            <div class="card-body">
+
+                <div class="text-center mb-4">
+                    <div class="logo">Bus Ticket Pro</div>
+                    <p class="text-muted mt-2">Tạo tài khoản mới</p>
+                </div>
+
+                <div th:if="${error}"
+                     class="alert alert-danger text-center"
+                     th:text="${error}">
+                </div>
+
+                <form th:action="@{/register}"
+                      method="post"
+                      th:object="${registerRequest}"
+                      id="registerForm">
+
+                    <div class="form-row">
+
+                        <!-- USERNAME -->
+                        <div class="form-group col-md-6">
+
+                            <label>Username</label>
+
+                            <input type="text"
+                                   th:field="*{username}"
+                                   id="username"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('username')} ? 'input-error' : ''"
+                                   placeholder="Nhập username">
+
+                            <div class="error-message" id="usernameError"
+                                 th:if="${#fields.hasErrors('username')}"
+                                 th:errors="*{username}">
+                            </div>
+
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="form-group col-md-6">
+
+                            <label>Email</label>
+
+                            <input type="email"
+                                   th:field="*{email}"
+                                   id="email"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''"
+                                   placeholder="Nhập email">
+
+                            <div class="error-message" id="emailError"
+                                 th:if="${#fields.hasErrors('email')}"
+                                 th:errors="*{email}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- FULL NAME -->
+                    <div class="form-group">
+
+                        <label>Họ và tên</label>
+
+                        <input type="text"
+                               th:field="*{fullName}"
+                               id="fullName"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('fullName')} ? 'input-error' : ''"
+                               placeholder="Nhập họ tên">
+
+                        <div class="error-message" id="fullNameError"
+                             th:if="${#fields.hasErrors('fullName')}"
+                             th:errors="*{fullName}">
+                        </div>
+
+                    </div>
+
+                    <!-- PHONE -->
+                    <div class="form-group">
+
+                        <label>Số điện thoại</label>
+
+                        <input type="text"
+                               th:field="*{phone}"
+                               id="phone"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('phone')} ? 'input-error' : ''"
+                               placeholder="Nhập số điện thoại">
+
+                        <div class="error-message" id="phoneError"
+                             th:if="${#fields.hasErrors('phone')}"
+                             th:errors="*{phone}">
+                        </div>
+
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="form-group">
+
+                        <label>Mật khẩu</label>
+
+                        <input type="password"
+                               th:field="*{password}"
+                               id="password"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('password')} ? 'input-error' : ''"
+                               placeholder="Nhập mật khẩu">
+
+                        <div class="error-message" id="passwordError"
+                             th:if="${#fields.hasErrors('password')}"
+                             th:errors="*{password}">
+                        </div>
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary btn-block btn-register">
+                        Đăng Ký
+                    </button>
+
+                </form>
+
+                <div class="text-center mt-4">
+                    Đã có tài khoản?
+                    <a href="/login"><b>Đăng nhập</b></a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const form = document.getElementById("registerForm");
+
+    const username = document.getElementById("username");
+    const email = document.getElementById("email");
+    const fullName = document.getElementById("fullName");
+    const phone = document.getElementById("phone");
+    const password = document.getElementById("password");
+
+    const usernameError = document.getElementById("usernameError");
+    const emailError = document.getElementById("emailError");
+    const fullNameError = document.getElementById("fullNameError");
+    const phoneError = document.getElementById("phoneError");
+    const passwordError = document.getElementById("passwordError");
+
+    function clearErrors() {
+        usernameError.innerText = "";
+        emailError.innerText = "";
+        fullNameError.innerText = "";
+        phoneError.innerText = "";
+        passwordError.innerText = "";
+
+        username.classList.remove("input-error");
+        email.classList.remove("input-error");
+        fullName.classList.remove("input-error");
+        phone.classList.remove("input-error");
+        password.classList.remove("input-error");
+    }
+
+    form.addEventListener("submit", function (e) {
+
+        let isValid = true;
+        clearErrors();
+
+        // Username validation: 4-20 characters
+        const usernameValue = username.value.trim();
+        if (usernameValue === "") {
+            usernameError.innerText = "Username không được để trống";
+            username.classList.add("input-error");
+            isValid = false;
+        } else if (usernameValue.length < 4 || usernameValue.length > 20) {
+            usernameError.innerText = "Username phải từ 4-20 ký tự";
+            username.classList.add("input-error");
+            isValid = false;
+        }
+
+        // Email validation
+        const emailValue = email.value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailValue === "") {
+            emailError.innerText = "Email không được để trống";
+            email.classList.add("input-error");
+            isValid = false;
+        } else if (!emailPattern.test(emailValue)) {
+            emailError.innerText = "Email không hợp lệ";
+            email.classList.add("input-error");
+            isValid = false;
+        }
+
+        // Full name validation: 2-100 characters
+        const fullNameValue = fullName.value.trim();
+        if (fullNameValue === "") {
+            fullNameError.innerText = "Họ tên không được để trống";
+            fullName.classList.add("input-error");
+            isValid = false;
+        } else if (fullNameValue.length < 2 || fullNameValue.length > 100) {
+            fullNameError.innerText = "Họ tên không hợp lệ";
+            fullName.classList.add("input-error");
+            isValid = false;
+        }
+
+        // Phone validation: starts with 0, followed by 9 digits
+        const phoneValue = phone.value.trim();
+        const phonePattern = /^0[0-9]{9}$/;
+        if (phoneValue === "") {
+            phoneError.innerText = "Số điện thoại không được để trống";
+            phone.classList.add("input-error");
+            isValid = false;
+        } else if (!phonePattern.test(phoneValue)) {
+            phoneError.innerText = "Số điện thoại không hợp lệ";
+            phone.classList.add("input-error");
+            isValid = false;
+        }
+
+        // Password validation: min 6 characters
+        const passwordValue = password.value;
+        if (passwordValue === "") {
+            passwordError.innerText = "Mật khẩu không được để trống";
+            password.classList.add("input-error");
+            isValid = false;
+        } else if (passwordValue.length < 6) {
+            passwordError.innerText = "Mật khẩu tối thiểu 6 ký tự";
+            password.classList.add("input-error");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

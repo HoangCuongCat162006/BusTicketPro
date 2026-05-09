@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+
+    <title th:text="${pageTitle}"></title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body{
+            background: #f4f8fb;
+        }
+
+        .form-box{
+            background: white;
+            max-width: 700px;
+            margin: 50px auto;
+            border-radius: 15px;
+            padding: 35px;
+        }
+
+        .page-title{
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="form-box shadow">
+
+        <!-- BACK -->
+        <a href="/admin/buses"
+           class="btn btn-secondary mb-3">
+
+            ← Quay lại
+
+        </a>
+
+        <!-- TITLE -->
+        <h3 class="page-title mb-4"
+            th:text="${pageTitle}">
+        </h3>
+
+        <!-- ALERT -->
+        <div th:if="${error}"
+             class="alert alert-danger"
+             th:text="${error}">
+        </div>
+
+        <!-- FORM -->
+        <form th:action="@{/admin/buses/save}"
+              method="post"
+              th:object="${bus}">
+
+            <input type="hidden"
+                   th:field="*{id}">
+
+            <!-- BIỂN SỐ -->
+            <div class="form-group">
+
+                <label>Biển số xe</label>
+
+                <input type="text"
+                       th:field="*{busNumber}"
+                       class="form-control"
+                       placeholder="Ví dụ: 51A-12345"
+                       required>
+
+            </div>
+
+            <!-- LOẠI XE -->
+            <div class="form-group">
+
+                <label>Loại xe</label>
+
+                <select th:field="*{type}"
+                        class="form-control">
+
+                    <option value="">-- Chọn loại xe --</option>
+
+                    <option value="Ghế ngồi">
+                        Ghế ngồi
+                    </option>
+
+                    <option value="Giường nằm">
+                        Giường nằm
+                    </option>
+
+                    <option value="Limousine">
+                        Limousine
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- SỐ GHẾ -->
+            <div class="form-group">
+
+                <label>Số ghế</label>
+
+                <input type="number"
+                       th:field="*{capacity}"
+                       class="form-control"
+                       placeholder="Nhập số ghế"
+                       required>
+
+            </div>
+
+            <!-- TRẠNG THÁI -->
+            <div class="form-group">
+
+                <label>Trạng thái hoạt động</label>
+
+                <select th:field="*{active}"
+                        class="form-control">
+
+                    <option value="true">
+                        Đang hoạt động
+                    </option>
+
+                    <option value="false">
+                        Ngừng hoạt động
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button class="btn btn-primary btn-block">
+
+                Lưu thông tin xe
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

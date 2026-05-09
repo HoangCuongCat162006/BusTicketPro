@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Quản lý xe</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body{
+            background: #f4f8fb;
+        }
+
+        .table-box{
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .page-title{
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .table td,
+        .table th{
+            vertical-align: middle;
+        }
+
+        .badge-active{
+            background: #28a745;
+            color: white;
+            padding: 7px 12px;
+            border-radius: 20px;
+        }
+
+        .badge-inactive{
+            background: #dc3545;
+            color: white;
+            padding: 7px 12px;
+            border-radius: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="page-title">
+            Quản lý xe
+        </h2>
+
+        <a href="/admin/buses/create"
+           class="btn btn-primary">
+
+            + Thêm xe
+
+        </a>
+
+    </div>
+
+    <!-- BACK -->
+    <div class="mb-3">
+
+        <a href="/admin/dashboard"
+           class="btn btn-secondary">
+
+            ← Quay lại Dashboard
+
+        </a>
+
+    </div>
+
+    <!-- ALERT -->
+    <div th:if="${success}"
+         class="alert alert-success"
+         th:text="${success}">
+    </div>
+
+    <div th:if="${error}"
+         class="alert alert-danger"
+         th:text="${error}">
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-box shadow">
+
+        <table class="table table-hover table-bordered">
+
+            <thead class="thead-dark">
+
+            <tr>
+
+                <th>ID</th>
+                <th>Biển số</th>
+                <th>Loại xe</th>
+                <th>Số ghế</th>
+                <th>Trạng thái</th>
+                <th width="200">Hành động</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr th:each="bus : ${buses}">
+
+                <td th:text="${bus.id}"></td>
+
+                <td th:text="${bus.busNumber}"></td>
+
+                <td th:text="${bus.type}"></td>
+
+                <td th:text="${bus.capacity}"></td>
+
+                <td>
+
+                    <span th:if="${bus.active}"
+                          class="badge-active">
+
+                        Đang hoạt động
+
+                    </span>
+
+                    <span th:unless="${bus.active}"
+                          class="badge-inactive">
+
+                        Ngừng hoạt động
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <a th:href="@{/admin/buses/edit/{id}(id=${bus.id})}"
+                       class="btn btn-warning btn-sm">
+
+                        Sửa
+
+                    </a>
+
+                    <a th:href="@{/admin/buses/delete/{id}(id=${bus.id})}"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Bạn có chắc muốn xóa xe này?')">
+
+                        Xóa
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

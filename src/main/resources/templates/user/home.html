@@ -1,0 +1,43 @@
+<!-- File path: src/main/resources/templates/user/home.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Ticket Pro - Trang chủ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">🎫 Bus Ticket Pro - Xin chào!</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Chào mừng bạn đến với hệ thống đặt vé xe khách</h4>
+                    <p class="lead">Bạn đã đăng nhập thành công với vai trò: <strong>Khách hàng</strong></p>
+
+                    <hr>
+
+                    <div class="d-grid gap-3">
+                        <a th:href="@{/user/search}" class="btn btn-primary btn-lg">
+                            🔍 Tìm chuyến xe
+                        </a>
+                        <a th:href="@{/profile}" class="btn btn-outline-primary">
+                            👤 Xem hồ sơ cá nhân
+                        </a>
+                        <a th:href="@{/user/my-tickets}" class="btn btn-outline-primary">
+                            🎟️ Vé của tôi
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <a th:href="@{/logout}" class="btn btn-danger">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
