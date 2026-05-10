@@ -1,70 +1,469 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-
     <meta charset="UTF-8">
-
-    <title>Vé của tôi</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vé của tôi - Bus Ticket Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: white !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        
+        .nav-link {
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 10px 20px;
+        }
+        
+        .nav-link:hover {
+            color: #3498db;
+        }
+        
+        .lookup-box {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .ticket-detail {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+        
+        .detail-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            color: #7f8c8d;
+            width: 200px;
+        }
+        
+        .detail-value {
+            color: #2c3e50;
+        }
+        
+        .badge-pending {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .badge-paid {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .badge-cancelled {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .table-box {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .table td,
+        .table th {
+            vertical-align: middle;
+            padding: 12px 16px;
+        }
+        
+        .table thead th {
+            background: #3498db;
+            color: white;
+            border: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-logout {
+            background: #e74c3c;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+    </style>
 </head>
 
-<body style="background:#f4f8fb;">
+<body>
 
-<div class="container mt-5">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" href="/user/home">
+            <i class="fas fa-bus"></i> Bus Ticket Pro
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home"><i class="fas fa-home me-2"></i> Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/booking"><i class="fas fa-search me-2"></i> Đặt vé</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/my-tickets"><i class="fas fa-ticket-alt me-2"></i> Vé của tôi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-logout ms-2" href="/login">
+                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
-    <h2 class="mb-4">Vé của tôi</h2>
+<div class="container mt-4">
 
-    <div class="card shadow">
+    <h4 class="mb-4">Vé của tôi</h4>
 
-        <div class="card-body">
+    <!-- Ticket Lookup Form -->
+    <div class="lookup-box">
 
-            <table class="table table-bordered">
+        <h5 class="mb-4"><i class="fas fa-search me-2"></i> Tra cứu vé</h5>
 
-                <thead class="thead-dark">
+        <div class="row g-3">
 
+            <div class="col-md-6">
+                <label for="ticketCode" class="form-label">Mã vé</label>
+                <input type="text" class="form-control" id="ticketCode" placeholder="Nhập mã vé">
+            </div>
+
+            <div class="col-md-6">
+                <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" id="phoneNumber" placeholder="Nhập số điện thoại">
+            </div>
+
+        </div>
+
+        <button class="btn btn-primary mt-3" id="lookupBtn">
+            <i class="fas fa-search me-2"></i> Tra cứu vé
+        </button>
+
+    </div>
+
+    <!-- Ticket Detail Display -->
+    <div id="ticketDetail" class="ticket-detail">
+
+        <h5 class="mb-4">Chi tiết vé</h5>
+
+        <div id="loadingDetail" class="text-center" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p>Đang tải thông tin vé...</p>
+        </div>
+
+        <div id="detailContent" style="display: none;">
+            <div class="detail-row">
+                <div class="detail-label">Mã vé:</div>
+                <div class="detail-value" id="detailTicketCode"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Họ tên hành khách:</div>
+                <div class="detail-value" id="detailPassengerName"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Số điện thoại:</div>
+                <div class="detail-value" id="detailPassengerPhone"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div class="detail-value" id="detailPassengerEmail"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Biển số xe:</div>
+                <div class="detail-value" id="detailVehicleLicensePlate"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Loại xe:</div>
+                <div class="detail-value" id="detailVehicleType"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Lộ trình:</div>
+                <div class="detail-value">
+                    <span id="detailDeparturePoint"></span> → <span id="detailDestination"></span>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Thời gian khởi hành:</div>
+                <div class="detail-value" id="detailDepartureTime"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Số ghế:</div>
+                <div class="detail-value" id="detailSeatNumber"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Tầng:</div>
+                <div class="detail-value" id="detailFloor"></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Trạng thái vé:</div>
+                <div class="detail-value">
+                    <span class="badge" id="detailTicketStatus"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorDetail" class="alert alert-danger" style="display: none;"></div>
+
+    </div>
+
+    <!-- User's Tickets List -->
+    <div class="table-box">
+
+        <h5 class="mb-4">Danh sách vé của bạn</h5>
+
+        <table class="table table-hover">
+
+            <thead>
                 <tr>
-
                     <th>Mã vé</th>
                     <th>Chuyến xe</th>
                     <th>Ghế</th>
                     <th>Ngày đi</th>
                     <th>Trạng thái</th>
-
+                    <th>Hành động</th>
                 </tr>
+            </thead>
 
-                </thead>
-
-                <tbody>
-
-                <tr>
-
+            <tbody id="userTicketsTableBody">
+                <tr data-ticket-id="1" data-ticket-status="PENDING" data-departure-time="2026-05-12T08:00">
                     <td>#BK001</td>
                     <td>Hà Nội → Đà Nẵng</td>
                     <td>A1</td>
-                    <td>12/05/2026</td>
-
+                    <td>12/05/2026 08:00</td>
                     <td>
-
-                        <span class="badge badge-success">
-                            Đã thanh toán
-                        </span>
-
+                        <span class="badge badge-warning user-status-badge">Chờ thanh toán</span>
                     </td>
-
+                    <td>
+                        <button class="btn btn-danger user-cancel-btn">Hủy vé</button>
+                    </td>
                 </tr>
 
-                </tbody>
+                <tr data-ticket-id="2" data-ticket-status="PAID" data-departure-time="2026-05-13T10:00">
+                    <td>#BK002</td>
+                    <td>Hà Nội → Đà Nẵng</td>
+                    <td>B2</td>
+                    <td>13/05/2026 10:00</td>
+                    <td>
+                        <span class="badge badge-success user-status-badge">Đã thanh toán</span>
+                    </td>
+                    <td>
+                        <span class="text-muted">-</span>
+                    </td>
+                </tr>
+            </tbody>
 
-            </table>
-
-        </div>
+        </table>
 
     </div>
 
 </div>
 
+<script>
+    document.getElementById('lookupBtn').addEventListener('click', function() {
+        const ticketCode = document.getElementById('ticketCode').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+        if (!ticketCode || !phoneNumber) {
+            alert('Vui lòng nhập mã vé và số điện thoại.');
+            return;
+        }
+
+        const ticketDetailDiv = document.getElementById('ticketDetail');
+        const loadingDiv = document.getElementById('loadingDetail');
+        const contentDiv = document.getElementById('detailContent');
+        const errorDiv = document.getElementById('errorDetail');
+
+        ticketDetailDiv.style.display = 'block';
+        loadingDiv.style.display = 'block';
+        contentDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+
+        fetch(`/my-tickets/api/lookup?ticketCode=${encodeURIComponent(ticketCode)}&phoneNumber=${encodeURIComponent(phoneNumber)}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            })
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+
+                document.getElementById('detailTicketCode').textContent = data.ticketCode;
+                document.getElementById('detailPassengerName').textContent = data.passengerName;
+                document.getElementById('detailPassengerPhone').textContent = data.passengerPhone;
+                document.getElementById('detailPassengerEmail').textContent = data.passengerEmail;
+                document.getElementById('detailVehicleLicensePlate').textContent = data.vehicleLicensePlate;
+                document.getElementById('detailVehicleType').textContent = data.vehicleType;
+                document.getElementById('detailDeparturePoint').textContent = data.departurePoint;
+                document.getElementById('detailDestination').textContent = data.destination;
+                
+                if (data.departureTime) {
+                    const departureTime = new Date(data.departureTime);
+                    document.getElementById('detailDepartureTime').textContent = departureTime.toLocaleString('vi-VN');
+                }
+                
+                document.getElementById('detailSeatNumber').textContent = data.seatNumber;
+                document.getElementById('detailFloor').textContent = data.floor ? 'Tầng ' + data.floor : 'Tầng 1';
+                
+                const statusBadge = document.getElementById('detailTicketStatus');
+                statusBadge.textContent = data.ticketStatus;
+                statusBadge.className = 'badge';
+                
+                if (data.ticketStatus === 'PENDING') {
+                    statusBadge.classList.add('badge-pending');
+                } else if (data.ticketStatus === 'PAID') {
+                    statusBadge.classList.add('badge-paid');
+                } else if (data.ticketStatus === 'CANCELLED') {
+                    statusBadge.classList.add('badge-cancelled');
+                }
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = error.message;
+            });
+    });
+
+    document.querySelectorAll('.user-cancel-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const ticketId = row.dataset.ticketId;
+            
+            if (confirm('Bạn có chắc chắn muốn hủy vé này?')) {
+                cancelTicketForPassenger(ticketId, row);
+            }
+        });
+    });
+
+    function cancelTicketForPassenger(ticketId, row) {
+        const button = row.querySelector('.user-cancel-btn');
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Đang xử lý...';
+
+        fetch(`/my-tickets/${ticketId}/cancel`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        })
+        .then(ticket => {
+            const statusBadge = row.querySelector('.user-status-badge');
+            statusBadge.textContent = 'Đã hủy';
+            statusBadge.className = 'badge badge-danger user-status-badge';
+            
+            const actionCell = row.querySelector('td:last-child');
+            actionCell.innerHTML = '<span class="text-muted">-</span>';
+            
+            alert('Hủy vé thành công!');
+        })
+        .catch(error => {
+            alert('Lỗi: ' + error.message);
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

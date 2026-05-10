@@ -38,6 +38,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // PASSENGER / USER
         System.out.println("→ Redirecting to USER home");
-        response.sendRedirect("/home");
+        response.sendRedirect("/user/home");
     }
 }

@@ -1,115 +1,263 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-
     <meta charset="UTF-8">
-
-    <title>Đặt vé xe</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt vé xe - Bus Ticket Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-
-        body{
-            background: #f4f8fb;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        .search-box{
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: white !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        
+        .nav-link {
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 10px 20px;
+        }
+        
+        .nav-link:hover {
+            color: #3498db;
+        }
+        
+        .search-box {
             background: white;
-            border-radius: 15px;
+            border-radius: 8px;
             padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
         }
-
-        .trip-card{
+        
+        .trip-card {
+            background: white;
             border: none;
-            border-radius: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
         }
-
-        .seat{
+        
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .seat {
             width: 40px;
             height: 40px;
-            border-radius: 8px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            margin: 4px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .seat-available {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .seat-available:hover {
+            background: #229954;
+        }
+        
+        .seat-booked {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+            cursor: not-allowed;
+        }
+        
+        .seat-pending {
+            background: #f39c12;
+            color: white;
+            border-color: #f39c12;
+            cursor: not-allowed;
+        }
+        
+        .seat-selected {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .aisle {
+            width: 20px;
+        }
+        
+        #seatMap {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .alert {
+            border-radius: 6px;
             border: none;
-            margin: 5px;
-            font-weight: bold;
+            font-size: 14px;
         }
-
-        .seat-available{
-            background: #28a745;
-            color: white;
+        
+        .badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
         }
-
-        .seat-booked{
-            background: #dc3545;
-            color: white;
+        
+        .btn-logout {
+            background: #e74c3c;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
         }
-
-        .seat-selected{
-            background: #007bff;
-            color: white;
+        
+        .btn-logout:hover {
+            background: #c0392b;
         }
-
     </style>
-
 </head>
 
 <body>
 
-<div class="container mt-5">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" href="/user/home">
+            <i class="fas fa-bus"></i> Bus Ticket Pro
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/home"><i class="fas fa-home me-2"></i> Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/booking"><i class="fas fa-search me-2"></i> Đặt vé</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/my-tickets"><i class="fas fa-ticket-alt me-2"></i> Vé của tôi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile"><i class="fas fa-user me-2"></i> Hồ sơ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-logout ms-2" href="/login">
+                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
 
     <!-- SEARCH -->
-    <div class="search-box shadow mb-5">
+    <div class="search-box">
 
-        <h3 class="mb-4">Tìm chuyến xe</h3>
+        <h4 class="mb-4"><i class="fas fa-search me-2"></i> Tìm chuyến xe</h4>
 
-        <form>
+        <form id="searchForm">
 
-            <div class="form-row">
+            <div class="row g-3">
 
-                <div class="form-group col-md-4">
-
-                    <label>Điểm đi</label>
-
-                    <select class="form-control">
-
+                <div class="col-md-4">
+                    <label class="form-label">Điểm đi</label>
+                    <select class="form-select" id="departurePoint">
                         <option>Hà Nội</option>
                         <option>Đà Nẵng</option>
                         <option>Hồ Chí Minh</option>
-
                     </select>
-
                 </div>
 
-                <div class="form-group col-md-4">
-
-                    <label>Điểm đến</label>
-
-                    <select class="form-control">
-
+                <div class="col-md-4">
+                    <label class="form-label">Điểm đến</label>
+                    <select class="form-select" id="destination">
                         <option>Đà Nẵng</option>
                         <option>Huế</option>
                         <option>Nha Trang</option>
-
                     </select>
-
                 </div>
 
-                <div class="form-group col-md-4">
-
-                    <label>Ngày đi</label>
-
-                    <input type="date"
-                           class="form-control">
-
+                <div class="col-md-4">
+                    <label class="form-label">Ngày đi</label>
+                    <input type="date" class="form-control" id="departureDate">
                 </div>
 
             </div>
 
-            <button class="btn btn-primary btn-block">
-
-                Tìm chuyến xe
-
+            <button type="submit" class="btn btn-primary mt-3">
+                <i class="fas fa-search me-2"></i> Tìm chuyến xe
             </button>
 
         </form>
@@ -117,34 +265,20 @@
     </div>
 
     <!-- DANH SÁCH CHUYẾN -->
-    <div class="card shadow trip-card mb-4">
+    <div id="tripList" class="trip-card" style="display: none;">
 
         <div class="card-body">
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
 
                 <div>
-
-                    <h4>Hà Nội → Đà Nẵng</h4>
-
-                    <p class="text-muted">
-                        Khởi hành: 08:00 - 12/05/2026
-                    </p>
-
+                    <h5 id="tripRoute">Hà Nội → Đà Nẵng</h5>
+                    <p class="text-muted mb-0" id="tripTime">Khởi hành: 08:00 - 12/05/2026</p>
                 </div>
 
-                <div class="text-right">
-
-                    <h4 class="text-primary">
-                        350.000đ
-                    </h4>
-
-                    <button class="btn btn-success">
-
-                        Chọn ghế
-
-                    </button>
-
+                <div class="text-end">
+                    <h5 class="text-primary mb-2" id="tripPrice">350.000đ</h5>
+                    <button class="btn btn-success" id="selectSeatBtn">Chọn ghế</button>
                 </div>
 
             </div>
@@ -154,60 +288,312 @@
     </div>
 
     <!-- SƠ ĐỒ GHẾ -->
-    <div class="card shadow trip-card">
+    <div id="seatMap" class="trip-card">
 
         <div class="card-body">
 
-            <h4 class="mb-4">Chọn ghế</h4>
+            <h5 class="mb-4">Chọn ghế</h5>
 
-            <div class="mb-4">
-
-                <button class="seat seat-available">A1</button>
-
-                <button class="seat seat-selected">A2</button>
-
-                <button class="seat seat-booked">A3</button>
-
-                <button class="seat seat-available">A4</button>
-
-                <button class="seat seat-available">A5</button>
-
+            <div id="loadingSeats" class="loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p>Đang tải sơ đồ ghế...</p>
             </div>
 
+            <div id="seatContainer" class="mb-4" style="display: none;"></div>
+
             <div class="mb-4">
-
-                <span class="badge badge-success">
-                    Ghế trống
-                </span>
-
-                <span class="badge badge-primary">
-                    Ghế đang chọn
-                </span>
-
-                <span class="badge badge-danger">
-                    Đã đặt
-                </span>
-
+                <span class="badge bg-success">Ghế trống</span>
+                <span class="badge bg-primary">Ghế đang chọn</span>
+                <span class="badge bg-warning">Ghế đang giữ (PENDING)</span>
+                <span class="badge bg-danger">Đã đặt</span>
             </div>
 
             <div class="alert alert-info">
-
-                Ghế đang chọn:
-                <b>A2</b>
-
+                Ghế đang chọn: <b id="selectedSeatsText">Chưa chọn</b>
             </div>
 
-            <button class="btn btn-primary btn-block">
+            <!-- Passenger Information Form -->
+            <div id="passengerForm" style="display: none;">
+                <h5 class="mb-3"><i class="fas fa-user me-2"></i> Thông tin hành khách</h5>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="passengerName" class="form-label">Họ tên</label>
+                        <input type="text" class="form-control" id="passengerName" required>
+                    </div>
 
-                Xác nhận đặt vé
+                    <div class="col-md-4">
+                        <label for="passengerPhone" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="passengerPhone" required>
+                    </div>
 
+                    <div class="col-md-4">
+                        <label for="passengerEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="passengerEmail" required>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="confirmBookingBtn" disabled>
+                <i class="fas fa-check-circle me-2"></i> Xác nhận đặt vé
             </button>
+
+            <!-- Booking Result -->
+            <div id="bookingResult" class="mt-3" style="display: none;"></div>
 
         </div>
 
     </div>
 
 </div>
+
+<script>
+    let currentTripId = null;
+    let selectedSeats = [];
+    let seatData = [];
+
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Mock trip search - in real implementation, this would call a trip search API
+        document.getElementById('tripList').style.display = 'block';
+        document.getElementById('tripRoute').textContent = 
+            document.getElementById('departurePoint').value + ' → ' + document.getElementById('destination').value;
+        document.getElementById('tripTime').textContent = 
+            'Khởi hành: 08:00 - ' + document.getElementById('departureDate').value;
+        
+        // Set a mock trip ID
+        currentTripId = 1;
+    });
+
+    document.getElementById('selectSeatBtn').addEventListener('click', function() {
+        if (currentTripId) {
+            loadSeats(currentTripId);
+        }
+    });
+
+    function loadSeats(tripId) {
+        document.getElementById('seatMap').style.display = 'block';
+        document.getElementById('loadingSeats').style.display = 'block';
+        document.getElementById('seatContainer').style.display = 'none';
+
+        fetch(`/booking/api/seats?tripId=${tripId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSeats').style.display = 'none';
+                document.getElementById('seatContainer').style.display = 'block';
+                seatData = data.seats;
+                renderSeatMap(data.seats);
+            })
+            .catch(error => {
+                console.error('Error loading seats:', error);
+                document.getElementById('loadingSeats').innerHTML = 
+                    '<p class="text-danger">Lỗi khi tải sơ đồ ghế. Vui lòng thử lại.</p>';
+            });
+    }
+
+    function renderSeatMap(seats) {
+        const container = document.getElementById('seatContainer');
+        container.innerHTML = '';
+
+        // Group seats by row (assuming seat numbers like A1, A2, B1, B2, etc.)
+        const rows = {};
+        seats.forEach(seat => {
+            const row = seat.seatNumber.charAt(0);
+            if (!rows[row]) {
+                rows[row] = [];
+            }
+            rows[row].push(seat);
+        });
+
+        // Render rows
+        Object.keys(rows).sort().forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'seat-row';
+
+            const sortedSeats = rows[row].sort((a, b) => {
+                const numA = parseInt(a.seatNumber.substring(1));
+                const numB = parseInt(b.seatNumber.substring(1));
+                return numA - numB;
+            });
+
+            sortedSeats.forEach((seat, index) => {
+                const seatBtn = document.createElement('button');
+                seatBtn.className = 'seat';
+                seatBtn.textContent = seat.seatNumber;
+                seatBtn.dataset.seatNumber = seat.seatNumber;
+
+                if (seat.status === 'BOOKED') {
+                    seatBtn.classList.add('seat-booked');
+                    seatBtn.disabled = true;
+                } else if (seat.status === 'PENDING') {
+                    seatBtn.classList.add('seat-pending');
+                    seatBtn.disabled = true;
+                    seatBtn.title = 'Ghế đang được giữ bởi khách hàng khác';
+                } else {
+                    seatBtn.classList.add('seat-available');
+                    seatBtn.addEventListener('click', () => toggleSeat(seat, seatBtn));
+                }
+
+                rowDiv.appendChild(seatBtn);
+
+                // Add aisle after 2 seats
+                if ((index + 1) % 2 === 0 && index < sortedSeats.length - 1) {
+                    const aisle = document.createElement('div');
+                    aisle.className = 'aisle';
+                    rowDiv.appendChild(aisle);
+                }
+            });
+
+            container.appendChild(rowDiv);
+        });
+    }
+
+    function toggleSeat(seat, seatBtn) {
+        const index = selectedSeats.indexOf(seat.seatNumber);
+        
+        if (index > -1) {
+            // Deselect
+            selectedSeats.splice(index, 1);
+            seatBtn.classList.remove('seat-selected');
+            seatBtn.classList.add('seat-available');
+            
+            // Unlock seat
+            // In real implementation, you'd need the seat ID
+            // unlockSeat(seat.id);
+        } else {
+            // Select
+            selectedSeats.push(seat.seatNumber);
+            seatBtn.classList.remove('seat-available');
+            seatBtn.classList.add('seat-selected');
+            
+            // Lock seat temporarily
+            // In real implementation, you'd need the seat ID
+            // lockSeat(seat.id);
+        }
+
+        updateSelectedSeatsText();
+        document.getElementById('confirmBookingBtn').disabled = selectedSeats.length === 0;
+    }
+
+    function updateSelectedSeatsText() {
+        const text = selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Chưa chọn';
+        document.getElementById('selectedSeatsText').textContent = text;
+        
+        // Show passenger form when seats are selected
+        if (selectedSeats.length > 0) {
+            document.getElementById('passengerForm').style.display = 'block';
+        } else {
+            document.getElementById('passengerForm').style.display = 'none';
+        }
+    }
+
+    document.getElementById('confirmBookingBtn').addEventListener('click', function() {
+        if (selectedSeats.length === 0) {
+            return;
+        }
+
+        // Validate passenger information
+        const passengerName = document.getElementById('passengerName').value.trim();
+        const passengerPhone = document.getElementById('passengerPhone').value.trim();
+        const passengerEmail = document.getElementById('passengerEmail').value.trim();
+
+        if (!passengerName || !passengerPhone || !passengerEmail) {
+            alert('Vui lòng nhập đầy đủ thông tin hành khách.');
+            return;
+        }
+
+        // Get the first selected seat (for single seat booking)
+        // For multiple seats, you would need to loop through all selected seats
+        const selectedSeatNumber = selectedSeats[0];
+        const selectedSeat = seatData.find(s => s.seatNumber === selectedSeatNumber);
+
+        if (!selectedSeat) {
+            alert('Không tìm thấy thông tin ghế.');
+            return;
+        }
+
+        // Disable button to prevent double submission
+        const confirmBtn = document.getElementById('confirmBookingBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Đang xử lý...';
+
+        // Prepare booking request
+        const bookingRequest = {
+            tripId: currentTripId,
+            seatId: selectedSeat.id, // You'll need to include seatId in the DTO
+            passengerName: passengerName,
+            passengerPhone: passengerPhone,
+            passengerEmail: passengerEmail
+        };
+
+        // Call booking API
+        fetch('/booking/api/book-ticket', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingRequest)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        })
+        .then(ticket => {
+            // Success
+            const resultDiv = document.getElementById('bookingResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>Đặt vé thành công!</h5>
+                    <p>Mã vé: <strong>${ticket.ticketCode}</strong></p>
+                    <p>Hành khách: ${ticket.passengerName}</p>
+                    <p>Ghế: ${selectedSeatNumber}</p>
+                    <p>Trạng thái: PENDING</p>
+                    <p class="mt-2">Vui lòng thanh toán để xác nhận đặt vé.</p>
+                </div>
+            `;
+            
+            // Reload seats after successful booking
+            setTimeout(() => {
+                loadSeats(currentTripId);
+                selectedSeats = [];
+                updateSelectedSeatsText();
+                resultDiv.style.display = 'none';
+            }, 5000);
+        })
+        .catch(error => {
+            // Error
+            const resultDiv = document.getElementById('bookingResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>Đặt vé thất bại!</h5>
+                    <p>${error.message}</p>
+                    <p>Vui lòng thử lại hoặc chọn ghế khác.</p>
+                </div>
+            `;
+            
+            // Reload seats to get updated status
+            setTimeout(() => {
+                loadSeats(currentTripId);
+            }, 2000);
+        })
+        .finally(() => {
+            // Re-enable button
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Xác nhận đặt vé';
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
