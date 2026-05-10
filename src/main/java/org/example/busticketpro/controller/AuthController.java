@@ -37,7 +37,7 @@ public class AuthController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("registerRequest", request);
-            return "auth/register";   // Quay lại form + giữ dữ liệu + hiển thị lỗi
+            return "auth/register";
         }
 
         try {
@@ -45,9 +45,9 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("success", "Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
             return "redirect:/login";
         } catch (Exception e) {
-            // Lỗi business (username/email tồn tại, ...)
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/register";
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("registerRequest", request);
+            return "auth/register";
         }
     }
 
