@@ -36,10 +36,12 @@ public class SeatService {
                     );
 
                     // Check if seat has a valid ticket (PENDING or PAID)
-                    boolean hasActiveTicket = ticketRepository.existsBySeatId(seat.getId()) &&
-                            ticketRepository.findByTripId(tripId).stream()
-                                    .filter(t -> t.getSeat() != null && t.getSeat().getId().equals(seat.getId()))
-                                    .anyMatch(t -> t.getStatus() == TicketStatus.PENDING || t.getStatus() == TicketStatus.PAID);
+                    boolean hasActiveTicket = ticketRepository.findByTripId(tripId).stream()
+                            .filter(t -> t.getSeat() != null &&
+                                    t.getSeat().getId().equals(seat.getId()))
+                            .anyMatch(t ->
+                                    t.getStatus() == TicketStatus.PENDING ||
+                                            t.getStatus() == TicketStatus.PAID);
 
                     // Check if seat is locked (temporary reservation)
                     boolean isLocked = seat.getLockedUntil() != null &&

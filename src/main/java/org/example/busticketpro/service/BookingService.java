@@ -14,7 +14,6 @@ import org.example.busticketpro.repository.TripRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,47 +27,85 @@ public class BookingService {
 
     @Transactional(rollbackFor = Exception.class)
     public Ticket processBooking(BookingRequest request) {
-        // Retrieve seat with optimistic locking (version field)
+
+        // 1. Lấy ghế
         Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(() -> new RuntimeException("Seat not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Không tìm thấy ghế số " + request.getSeatId()));
 
-        // Check if seat is available
-        if (seat.getStatus() != SeatStatus.AVAILABLE) {
-            throw new SeatAlreadyBookedException("Seat is not available. Current status: " + seat.getStatus());
+        LocalDateTime now = LocalDateTime.now();
+
+        // =====================================================
+        // 2. Nếu ghế đang PENDING nhưng đã hết thời gian lock
+        // => tự động mở ghế lại
+        // =====================================================
+        if (seat.getStatus() == SeatStatus.PENDING) {
+
+            boolean lockExpired =
+                    seat.getLockedUntil() == null ||
+                            seat.getLockedUntil().isBefore(now);
+
+            if (lockExpired) {
+                seat.setStatus(SeatStatus.AVAILABLE);
+                seat.setLockedUntil(null);
+
+                seatRepository.save(seat);
+            }
         }
 
-        // Check if seat is locked by another user
-        if (seat.getLockedUntil() != null && seat.getLockedUntil().isAfter(LocalDateTime.now())) {
-            throw new SeatAlreadyBookedException("Seat is temporarily reserved by another user");
+        // =====================================================
+        // 3. Nếu ghế đã BOOKED thật
+        // =====================================================
+        if (seat.getStatus() == SeatStatus.BOOKED) {
+            throw new SeatAlreadyBookedException(
+                    "Ghế này đã được đặt thành công bởi người khác.");
         }
 
-        // Retrieve trip
+        // =====================================================
+        // 4. Nếu ghế vẫn đang bị lock hợp lệ
+        // =====================================================
+        if (seat.getStatus() == SeatStatus.PENDING &&
+                seat.getLockedUntil() != null &&
+                seat.getLockedUntil().isBefore(now)) {
+
+            seat.setStatus(SeatStatus.AVAILABLE);
+            seat.setLockedUntil(null);
+        }
+        // =====================================================
+        // 5. Lấy thông tin chuyến xe
+        // =====================================================
         Trip trip = tripRepository.findById(request.getTripId())
-                .orElseThrow(() -> new RuntimeException("Trip not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Không tìm thấy chuyến xe"));
 
-        // Create ticket with PENDING status
+        // =====================================================
+        // 6. Tạo vé
+        // =====================================================
         Ticket ticket = Ticket.builder()
                 .ticketCode(generateTicketCode())
                 .passengerName(request.getPassengerName())
                 .passengerPhone(request.getPassengerPhone())
                 .passengerEmail(request.getPassengerEmail())
+                .userId(request.getUserId())
                 .totalPrice(trip.getPrice())
                 .status(TicketStatus.PENDING)
-                .bookedAt(LocalDateTime.now())
+                .bookedAt(now)
                 .trip(trip)
                 .seat(seat)
                 .build();
 
-        // Update seat status to PENDING
-        seat.setStatus(SeatStatus.PENDING);
-        seat.setLockedUntil(LocalDateTime.now().plusMinutes(15)); // 15-minute reservation
+        // =====================================================
+        // 7. Lock ghế lại
+        // =====================================================
+        seat.setStatus(SeatStatus.BOOKED);
+        seat.setLockedUntil(null);
 
-        // Save both entities in the same transaction
-        // If any operation fails, both will rollback
-        Ticket savedTicket = ticketRepository.save(ticket);
+        ticket.setStatus(TicketStatus.PAID);
+
+        ticketRepository.save(ticket);
         seatRepository.save(seat);
 
-        return savedTicket;
+        return ticket;
     }
 
     private String generateTicketCode() {

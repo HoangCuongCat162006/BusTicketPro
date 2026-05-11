@@ -3,6 +3,8 @@ package org.example.busticketpro.repository;
 import org.example.busticketpro.entity.Ticket;
 import org.example.busticketpro.entity.TicketStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,10 +31,25 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             String passengerPhone
     );
 
+    // Tìm bằng mã vé (case-insensitive)
+    Optional<Ticket> findByTicketCodeIgnoreCase(String ticketCode);
+
     // Vé theo chuyến
     List<Ticket> findByTripId(Long tripId);
 
     // Kiểm tra ghế đã có vé chưa
     boolean existsBySeatId(Long seatId);
 
+    @Query("""
+    SELECT t
+    FROM Ticket t
+    WHERE UPPER(t.ticketCode) = UPPER(:ticketCode)
+    AND REPLACE(t.passengerPhone, ' ', '') = REPLACE(:phoneNumber, ' ', '')
+""")
+    Optional<Ticket> lookupTicket(
+            @Param("ticketCode") String ticketCode,
+            @Param("phoneNumber") String phoneNumber
+    );
+
 }
+

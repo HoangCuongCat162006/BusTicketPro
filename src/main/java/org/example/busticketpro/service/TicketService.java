@@ -51,7 +51,7 @@ public class TicketService {
                 .bookedAt(LocalDateTime.now())
                 .trip(trip)
                 .seat(seat)
-                .user(null) // sẽ set sau nếu cần
+                .userId(request.getUserId())   // truyền userId từ BookingRequest
                 .build();
 
         return ticketRepository.save(ticket);
@@ -61,6 +61,7 @@ public class TicketService {
         return "BK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
+
     // ====================== CORE-07 ======================
     @Transactional(readOnly = true)
     public List<TicketSummaryDTO> getTicketsByUser(Long userId) {
@@ -69,9 +70,25 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public TicketDetailDTO getTicketDetail(String ticketCode, String phoneNumber) {
-        Ticket ticket = ticketRepository.findByTicketCodeAndPassengerPhone(ticketCode, phoneNumber)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé hoặc SĐT không khớp"));
+    public TicketDetailDTO getTicketDetail(String ticketCode,
+                                           String phoneNumber) {
+
+        String code = ticketCode
+                .trim()
+                .replace("#", "")
+                .toUpperCase();
+
+        String phone = phoneNumber
+                .trim()
+                .replace(" ", "");
+
+        Ticket ticket = ticketRepository
+                .lookupTicket(code, phone)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Không tìm thấy vé hoặc số điện thoại không đúng"
+                        ));
+
         return convertToDetailDTO(ticket);
     }
 
@@ -121,9 +138,14 @@ public class TicketService {
 
     // ====================== CORE-09: HỦY VÉ ======================
     @Transactional
-    public void cancelTicketForPassenger(Long ticketId) {
+    public void cancelTicketForPassenger(Long ticketId, Long userId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+
+        // Kiểm tra vé có thuộc về user đang đăng nhập không
+        if (!ticket.getUserId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền hủy vé này");
+        }
 
         if (ticket.getStatus() != TicketStatus.PENDING) {
             throw new RuntimeException("Chỉ có thể hủy vé đang chờ thanh toán");
@@ -154,6 +176,7 @@ public class TicketService {
         dto.setTotalPrice(ticket.getTotalPrice());
         dto.setStatus(ticket.getStatus() != null ? ticket.getStatus().name() : null);
         dto.setDepartureTime(ticket.getTrip() != null ? ticket.getTrip().getDepartureTime() : null);
+        dto.setPassengerPhone(ticket.getPassengerPhone());
 
         if (ticket.getSeat() != null) {
             dto.setSeatNumber(ticket.getSeat().getSeatNumber());
@@ -164,6 +187,9 @@ public class TicketService {
             dto.setDestination(ticket.getTrip().getRoute().getArrival().getName());
         }
         return dto;
+    }
+    public List<Ticket> getAllTickets() {
+        return ticketRepository.findAll();
     }
 
     private TicketDetailDTO convertToDetailDTO(Ticket ticket) {

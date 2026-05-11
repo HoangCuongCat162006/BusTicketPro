@@ -21,4 +21,5 @@ public class TicketSummaryDTO {
     private String seatNumber;
     private String status;
     private BigDecimal totalPrice;
+    private String passengerPhone;
 }

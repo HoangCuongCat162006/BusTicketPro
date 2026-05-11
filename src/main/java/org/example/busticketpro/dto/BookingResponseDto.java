@@ -1,15 +1,12 @@
-// src/main/java/org/example/busticketpro/dto/BookingResponseDto.java
 package org.example.busticketpro.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,19 +19,23 @@ public class BookingResponseDto {
     private String passengerEmail;
     private BigDecimal totalPrice;
     private String status;
-
-    // Thông tin chuyến xe
     private Long tripId;
     private String departurePoint;
     private String destination;
     private LocalDateTime departureTime;
-    private String licensePlate;        // Biển số xe
+    private String licensePlate;
     private String busType;
-
-    // Thông tin ghế
     private String seatNumber;
     private Integer floor;
-
     private LocalDateTime bookedAt;
-    private LocalDateTime lockedUntil;   // thời gian giữ chỗ
+    private LocalDateTime lockedUntil;
+
+    private String errorMessage;     // <-- Thêm dòng này
+
+    // Phương thức tiện ích trả về lỗi
+    public static BookingResponseDto error(String message) {
+        BookingResponseDto dto = new BookingResponseDto();
+        dto.setErrorMessage(message);
+        return dto;
+    }
 }

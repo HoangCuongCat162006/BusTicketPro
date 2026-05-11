@@ -3,7 +3,7 @@ package org.example.busticketpro.controller.user;
 import lombok.RequiredArgsConstructor;
 import org.example.busticketpro.dto.TicketDetailDTO;
 import org.example.busticketpro.dto.TicketSummaryDTO;
-import org.example.busticketpro.entity.User;
+import org.example.busticketpro.security.CustomUserDetails;
 import org.example.busticketpro.service.TicketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +20,12 @@ public class UserTicketController {
 
     private final TicketService ticketService;
 
+    // === Ticket Lookup Page ===
+    @GetMapping("/lookup")
+    public String ticketLookup() {
+        return "user/ticket/lookup";
+    }
+
     // === SỬA Ở ĐÂY: Load danh sách vé của user đang login ===
     @GetMapping
     public String myTickets(Model model, Authentication authentication) {
@@ -27,7 +33,7 @@ public class UserTicketController {
             return "redirect:/login";
         }
 
-        User currentUser = (User) authentication.getPrincipal();
+        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
         List<TicketSummaryDTO> tickets = ticketService.getTicketsByUser(currentUser.getId());
 
         model.addAttribute("tickets", tickets);
@@ -50,15 +56,14 @@ public class UserTicketController {
         }
     }
 
-    // API Hủy vé (giữ nguyên)
+    // API Hủy vé — có kiểm tra ownership
     @PostMapping("/{ticketId}/cancel")
     @ResponseBody
     public ResponseEntity<?> cancelTicket(@PathVariable Long ticketId, Authentication authentication) {
         try {
-            // Tốt nhất nên kiểm tra vé thuộc về user đang login
-            User currentUser = (User) authentication.getPrincipal();
+            CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
 
-            ticketService.cancelTicketForPassenger(ticketId);   // Service đã có logic
+            ticketService.cancelTicketForPassenger(ticketId, currentUser.getId());
             return ResponseEntity.ok("Hủy vé thành công");
 
         } catch (Exception e) {

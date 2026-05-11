@@ -5,3 +5,4 @@ public enum SeatStatus {
     PENDING,
     BOOKED
 }
+

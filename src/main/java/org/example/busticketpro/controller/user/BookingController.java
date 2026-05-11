@@ -8,7 +8,7 @@ import org.example.busticketpro.dto.TripResponseDto;
 import org.example.busticketpro.entity.*;
 import org.example.busticketpro.exception.SeatAlreadyBookedException;
 import org.example.busticketpro.repository.LocationRepository;
-import org.example.busticketpro.service.BookingService;
+import org.example.busticketpro.service.TicketService;
 import org.example.busticketpro.service.SeatService;
 import org.example.busticketpro.service.TripService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +18,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.example.busticketpro.entity.Bus;
 import org.example.busticketpro.entity.Route;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.example.busticketpro.security.CustomUserDetails;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +30,7 @@ import java.util.List;
 public class BookingController {
 
     private final SeatService        seatService;
-    private final BookingService     bookingService;
+    private final TicketService      ticketService;
     private final TripService        tripService;
     private final LocationRepository locationRepository;
 
@@ -94,19 +96,26 @@ public class BookingController {
     // ==================== API ĐẶT VÉ ====================
     @PostMapping("/api/book-ticket")
     @ResponseBody
-    public ResponseEntity<?> bookTicket(@RequestBody BookingRequest request) {
-        try {
-            Ticket ticket = bookingService.processBooking(request);
+    public ResponseEntity<BookingResponseDto> bookTicket(
+            @RequestBody BookingRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {   // Lấy thông tin người dùng đang login
 
-            // === SỬA Ở ĐÂY: Chuyển sang DTO thay vì trả Entity ===
+        try {
+            if (userDetails == null) {
+                return ResponseEntity.badRequest().body(BookingResponseDto.error("Bạn cần đăng nhập để đặt vé"));
+            }
+
+            request.setUserId(userDetails.getId());   // Gắn userId vào request
+
+            Ticket ticket = ticketService.processBooking(request);
             BookingResponseDto response = convertToBookingResponse(ticket);
 
             return ResponseEntity.ok(response);
 
         } catch (SeatAlreadyBookedException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(BookingResponseDto.error(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Đặt vé thất bại: " + e.getMessage());
+            return ResponseEntity.badRequest().body(BookingResponseDto.error("Đặt vé thất bại: " + e.getMessage()));
         }
     }
 

@@ -197,6 +197,18 @@
 </nav>
 
 <div class="container">
+    <!-- Nút quay lại theo role -->
+    <div class="mt-3 mb-2">
+        <a th:if="${user.role.name() == 'ADMIN'}" href="/admin/dashboard" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại Dashboard
+        </a>
+        <a th:if="${user.role.name() == 'STAFF'}" href="/staff" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại Dashboard
+        </a>
+        <a th:if="${user.role.name() == 'PASSENGER'}" href="/user/home" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại Trang chủ
+        </a>
+    </div>
     <div class="profile-card">
 
         <!-- Avatar & thông tin cố định -->

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tra cứu vé</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body{
+            background:#f4f8fb;
+        }
+
+        .lookup-box{
+            background:white;
+            max-width:900px;
+            margin:50px auto;
+            border-radius:15px;
+            padding:30px;
+        }
+
+        .status-paid{
+            background:#28a745;
+            color:white;
+        }
+
+        .status-pending{
+            background:#ffc107;
+            color:black;
+        }
+
+        .status-cancelled{
+            background:#dc3545;
+            color:white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="lookup-box shadow">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="/user/home" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+            <h2 class="mb-0 text-primary">
+                Tra cứu vé xe
+            </h2>
+        </div>
+
+        <!-- FORM -->
+        <form id="lookupForm">
+
+            <div class="form-group">
+                <label>Mã vé</label>
+
+                <input type="text"
+                       id="ticketCode"
+                       class="form-control"
+                       placeholder="Nhập mã vé"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label>Số điện thoại</label>
+
+                <input type="text"
+                       id="phoneNumber"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary btn-block">
+
+                Tra cứu vé
+
+            </button>
+
+        </form>
+
+        <!-- ERROR -->
+        <div id="errorSection"
+             class="alert alert-danger mt-4 d-none">
+
+            <span id="errorMessage"></span>
+
+        </div>
+
+        <!-- RESULT -->
+        <div id="resultSection"
+             class="mt-4 d-none">
+
+            <h4 class="mb-3">
+                Thông tin vé
+            </h4>
+
+            <div id="ticketDetails"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    document.getElementById('lookupForm')
+        .addEventListener('submit', async function (e) {
+
+            e.preventDefault();
+
+            const ticketCode =
+                document.getElementById('ticketCode').value.trim();
+
+            const phoneNumber =
+                document.getElementById('phoneNumber').value.trim();
+
+            const resultSection =
+                document.getElementById('resultSection');
+
+            const errorSection =
+                document.getElementById('errorSection');
+
+            const errorMessage =
+                document.getElementById('errorMessage');
+
+            const ticketDetails =
+                document.getElementById('ticketDetails');
+
+            resultSection.classList.add('d-none');
+            errorSection.classList.add('d-none');
+
+            try {
+
+                const response = await fetch(
+                    `/my-tickets/api/lookup?ticketCode=${encodeURIComponent(ticketCode)}&phoneNumber=${encodeURIComponent(phoneNumber)}`
+                );
+
+                const text = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(text || 'Không tìm thấy vé');
+                }
+
+                const ticket = JSON.parse(text);
+
+                const status = ticket.ticketStatus || '';
+
+                let statusText = '';
+                let statusClass = '';
+
+                if (status === 'PAID') {
+                    statusText = 'Đã thanh toán';
+                    statusClass = 'status-paid';
+                }
+                else if (status === 'PENDING') {
+                    statusText = 'Chờ thanh toán';
+                    statusClass = 'status-pending';
+                }
+                else {
+                    statusText = 'Đã hủy';
+                    statusClass = 'status-cancelled';
+                }
+
+                ticketDetails.innerHTML = `
+                    <table class="table table-bordered">
+
+                        <tr>
+                            <th>Mã vé</th>
+                            <td>${ticket.ticketCode || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Hành khách</th>
+                            <td>${ticket.passengerName || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>SĐT</th>
+                            <td>${ticket.passengerPhone || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Tuyến đường</th>
+                            <td>
+                                ${ticket.departurePoint || ''}
+                                →
+                                ${ticket.destination || ''}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Ghế</th>
+                            <td>${ticket.seatNumber || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Tầng</th>
+                            <td>${ticket.floor || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Biển số xe</th>
+                            <td>${ticket.vehicleLicensePlate || ''}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Khởi hành</th>
+                            <td>
+                                ${ticket.departureTime
+                    ? new Date(ticket.departureTime).toLocaleString('vi-VN')
+                    : ''}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Trạng thái</th>
+
+                            <td>
+                                <span class="badge px-3 py-2 ${statusClass}">
+                                    ${statusText}
+                                </span>
+                            </td>
+                        </tr>
+
+                    </table>
+                `;
+
+                resultSection.classList.remove('d-none');
+
+            }
+            catch (error) {
+
+                errorMessage.innerText = error.message;
+
+                errorSection.classList.remove('d-none');
+            }
+        });
+
+</script>
+
+</body>
+</html>

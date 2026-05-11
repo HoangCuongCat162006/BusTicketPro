@@ -17,8 +17,13 @@
 <body>
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-ticket-alt"></i> Vé của tôi</h2>
-        <a href="/" class="btn btn-primary">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/user/home" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+            <h2 class="mb-0"><i class="fas fa-ticket-alt"></i> Vé của tôi</h2>
+        </div>
+        <a href="/booking" class="btn btn-primary">
             <i class="fas fa-search"></i> Tìm chuyến mới
         </a>
     </div>
@@ -36,6 +41,7 @@
                         <th>Mã vé</th>
                         <th>Tuyến đường</th>
                         <th>Ghế</th>
+                        <th>SĐT</th>
                         <th>Khởi hành</th>
                         <th>Giá vé</th>
                         <th>Trạng thái</th>
@@ -51,14 +57,13 @@
                             <span th:text="${ticket.destination}"></span>
                         </td>
                         <td><strong th:text="${ticket.seatNumber}"></strong></td>
-                        <td th:text="${#dates.format(ticket.departureTime, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${ticket.passengerPhone}"></td>
+                        <td th:text="${#temporals.format(ticket.departureTime, 'dd/MM/yyyy HH:mm')}"></td>
                         <td th:text="${#numbers.formatDecimal(ticket.totalPrice, 1, 0)} + ' VNĐ'"></td>
                         <td>
                                     <span class="badge px-3 py-2"
-                                          th:classappend="${ticket.status == 'PENDING'} ? 'status-pending' :
-                                                          ${ticket.status == 'PAID'} ? 'status-paid' : 'status-cancelled'"
-                                          th:text="${ticket.status == 'PENDING'} ? 'Chờ thanh toán' :
-                                                   ${ticket.status == 'PAID'} ? 'Đã thanh toán' : 'Đã hủy'">
+                                          th:classappend="${ticket.status == 'PENDING'} ? 'status-pending' : (${ticket.status == 'PAID'} ? 'status-paid' : 'status-cancelled')"
+                                          th:text="${ticket.status == 'PENDING'} ? 'Chờ thanh toán' : (${ticket.status == 'PAID'} ? 'Đã thanh toán' : 'Đã hủy')">
                                     </span>
                         </td>
                         <td>
@@ -79,7 +84,7 @@
             <div th:if="${tickets == null or tickets.isEmpty()}" class="text-center py-5">
                 <i class="fas fa-ticket-alt fa-5x text-muted mb-3"></i>
                 <h5 class="text-muted">Bạn chưa có vé nào</h5>
-                <a href="/" class="btn btn-primary mt-3">Tìm và đặt vé ngay</a>
+                <a href="/user/home" class="btn btn-primary mt-3">Tìm và đặt vé ngay</a>
             </div>
         </div>
     </div>

@@ -90,6 +90,7 @@
         <form th:action="@{/admin/buses/save}" method="post" th:object="${bus}">
             <input type="hidden" th:field="*{id}">
 
+
             <div class="mb-3">
                 <label for="licensePlate" class="form-label">Biển số xe</label>
                 <input type="text" th:field="*{licensePlate}" id="licensePlate"
