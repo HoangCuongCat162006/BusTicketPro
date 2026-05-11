@@ -1,17 +1,18 @@
 package org.example.busticketpro.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.busticketpro.dto.BookingRequest;
 import org.example.busticketpro.dto.TicketDetailDTO;
-import org.example.busticketpro.entity.Seat;
-import org.example.busticketpro.entity.SeatStatus;
-import org.example.busticketpro.entity.Ticket;
-import org.example.busticketpro.entity.TicketStatus;
+import org.example.busticketpro.dto.TicketSummaryDTO;
+import org.example.busticketpro.entity.*;
 import org.example.busticketpro.exception.SeatAlreadyBookedException;
-import org.example.busticketpro.repository.SeatRepository;
-import org.example.busticketpro.repository.TicketRepository;
+import org.example.busticketpro.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,130 +20,177 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final SeatRepository seatRepository;
+    private final TripRepository tripRepository;
+
+    // ====================== CORE-06: ĐẶT VÉ + TRANSACTION ======================
+    @Transactional
+    public Ticket processBooking(BookingRequest request) {
+        Trip trip = tripRepository.findById(request.getTripId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyến xe"));
+
+        Seat seat = seatRepository.findById(request.getSeatId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ghế"));
+
+        if (seat.getStatus() != SeatStatus.AVAILABLE) {
+            throw new SeatAlreadyBookedException("Ghế này đã được đặt hoặc đang giữ chỗ");
+        }
+
+        // Giữ ghế tạm thời
+        seat.setStatus(SeatStatus.PENDING);
+        seat.setLockedUntil(LocalDateTime.now().plusMinutes(15));
+        seatRepository.save(seat);
+
+        // Tạo vé
+        Ticket ticket = Ticket.builder()
+                .ticketCode(generateTicketCode())
+                .passengerName(request.getPassengerName())
+                .passengerPhone(request.getPassengerPhone())
+                .passengerEmail(request.getPassengerEmail())
+                .totalPrice(trip.getPrice())
+                .status(TicketStatus.PENDING)
+                .bookedAt(LocalDateTime.now())
+                .trip(trip)
+                .seat(seat)
+                .user(null) // sẽ set sau nếu cần
+                .build();
+
+        return ticketRepository.save(ticket);
+    }
+
+    private String generateTicketCode() {
+        return "BK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    // ====================== CORE-07 ======================
+    @Transactional(readOnly = true)
+    public List<TicketSummaryDTO> getTicketsByUser(Long userId) {
+        List<Ticket> tickets = ticketRepository.findByUserId(userId);
+        return tickets.stream().map(this::convertToSummaryDTO).toList();
+    }
 
     @Transactional(readOnly = true)
     public TicketDetailDTO getTicketDetail(String ticketCode, String phoneNumber) {
-        // Find ticket by code and phone number
         Ticket ticket = ticketRepository.findByTicketCodeAndPassengerPhone(ticketCode, phoneNumber)
-                .orElseThrow(() -> new SeatAlreadyBookedException("Ticket not found or phone number doesn't match"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé hoặc SĐT không khớp"));
+        return convertToDetailDTO(ticket);
+    }
 
-        // Map to DTO using JOIN relationships
+    // ====================== CORE-08: STAFF ======================
+    @Transactional(readOnly = true)
+    public List<TicketDetailDTO> getAllTicketsForStaff() {
+        List<Ticket> tickets = ticketRepository.findAllByOrderByStatusAscBookedAtDesc();
+        return tickets.stream().map(this::convertToDetailDTO).toList();
+    }
+
+    @Transactional
+    public void confirmPayment(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+
+        if (ticket.getStatus() != TicketStatus.PENDING) {
+            throw new RuntimeException("Chỉ có thể xác nhận vé đang chờ thanh toán");
+        }
+
+        ticket.setStatus(TicketStatus.PAID);
+        ticketRepository.save(ticket);
+    }
+
+    @Transactional
+    public void cancelTicketByStaff(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+
+        ticket.setStatus(TicketStatus.CANCELLED);
+
+        if (ticket.getSeat() != null) {
+            Seat seat = ticket.getSeat();
+            seat.setStatus(SeatStatus.AVAILABLE);
+            seat.setLockedUntil(null);
+            seatRepository.save(seat);
+        }
+
+        ticketRepository.save(ticket);
+    }
+
+    @Transactional(readOnly = true)
+    public TicketDetailDTO getTicketDetailById(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+        return convertToDetailDTO(ticket);
+    }
+
+    // ====================== CORE-09: HỦY VÉ ======================
+    @Transactional
+    public void cancelTicketForPassenger(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+
+        if (ticket.getStatus() != TicketStatus.PENDING) {
+            throw new RuntimeException("Chỉ có thể hủy vé đang chờ thanh toán");
+        }
+
+        if (ticket.getTrip() != null &&
+                ticket.getTrip().getDepartureTime().minusHours(12).isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Đã quá thời hạn hủy vé (phải hủy trước 12 tiếng)");
+        }
+
+        ticket.setStatus(TicketStatus.CANCELLED);
+
+        if (ticket.getSeat() != null) {
+            Seat seat = ticket.getSeat();
+            seat.setStatus(SeatStatus.AVAILABLE);
+            seat.setLockedUntil(null);
+            seatRepository.save(seat);
+        }
+
+        ticketRepository.save(ticket);
+    }
+
+    // ====================== CONVERTERS ======================
+    private TicketSummaryDTO convertToSummaryDTO(Ticket ticket) {
+        TicketSummaryDTO dto = new TicketSummaryDTO();
+        dto.setId(ticket.getId());
+        dto.setTicketCode(ticket.getTicketCode());
+        dto.setTotalPrice(ticket.getTotalPrice());
+        dto.setStatus(ticket.getStatus() != null ? ticket.getStatus().name() : null);
+        dto.setDepartureTime(ticket.getTrip() != null ? ticket.getTrip().getDepartureTime() : null);
+
+        if (ticket.getSeat() != null) {
+            dto.setSeatNumber(ticket.getSeat().getSeatNumber());
+        }
+
+        if (ticket.getTrip() != null && ticket.getTrip().getRoute() != null) {
+            dto.setDeparturePoint(ticket.getTrip().getRoute().getDeparture().getName());
+            dto.setDestination(ticket.getTrip().getRoute().getArrival().getName());
+        }
+        return dto;
+    }
+
+    private TicketDetailDTO convertToDetailDTO(Ticket ticket) {
         TicketDetailDTO dto = new TicketDetailDTO();
+
         dto.setTicketCode(ticket.getTicketCode());
         dto.setPassengerName(ticket.getPassengerName());
         dto.setPassengerPhone(ticket.getPassengerPhone());
         dto.setPassengerEmail(ticket.getPassengerEmail());
-        dto.setTicketStatus(ticket.getStatus().name());
+        dto.setTicketStatus(ticket.getStatus() != null ? ticket.getStatus().name() : "UNKNOWN");
+        dto.setDepartureTime(ticket.getTrip() != null ? ticket.getTrip().getDepartureTime() : null);
 
-        // Get seat information
         if (ticket.getSeat() != null) {
             dto.setSeatNumber(ticket.getSeat().getSeatNumber());
             dto.setFloor(ticket.getSeat().getFloor());
         }
 
-        // Get trip information
         if (ticket.getTrip() != null) {
-            dto.setDepartureTime(ticket.getTrip().getDepartureTime());
-
-            // Get route information
             if (ticket.getTrip().getRoute() != null) {
-                dto.setDeparturePoint(
-                        ticket.getTrip().getRoute().getDeparture().getName()
-                );
-
-                dto.setDestination(
-                        ticket.getTrip().getRoute().getArrival().getName()
-                );
+                dto.setDeparturePoint(ticket.getTrip().getRoute().getDeparture().getName());
+                dto.setDestination(ticket.getTrip().getRoute().getArrival().getName());
             }
-
-            // Get bus information
             if (ticket.getTrip().getBus() != null) {
                 dto.setVehicleLicensePlate(ticket.getTrip().getBus().getLicensePlate());
-                dto.setVehicleType(ticket.getTrip().getBus().getBusType());
             }
         }
 
         return dto;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public Ticket confirmPayment(Long ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        if (ticket.getStatus() != TicketStatus.PENDING) {
-            throw new RuntimeException("Only PENDING tickets can be confirmed");
-        }
-
-        // Update ticket status to PAID
-        ticket.setStatus(TicketStatus.PAID);
-
-        // Update seat status to BOOKED
-        if (ticket.getSeat() != null) {
-            Seat seat = ticket.getSeat();
-            seat.setStatus(SeatStatus.BOOKED);
-            seat.setLockedUntil(null); // Clear any temporary lock
-            seatRepository.save(seat);
-        }
-
-        return ticketRepository.save(ticket);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public Ticket cancelTicket(Long ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        if (ticket.getStatus() != TicketStatus.PENDING) {
-            throw new RuntimeException("Only PENDING tickets can be cancelled");
-        }
-
-        // Update ticket status to CANCELLED
-        ticket.setStatus(TicketStatus.CANCELLED);
-
-        // Release seat back to AVAILABLE
-        if (ticket.getSeat() != null) {
-            Seat seat = ticket.getSeat();
-            seat.setStatus(SeatStatus.AVAILABLE);
-            seat.setLockedUntil(null); // Clear any temporary lock
-            seatRepository.save(seat);
-        }
-
-        return ticketRepository.save(ticket);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public Ticket cancelTicketForPassenger(Long ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
-
-        if (ticket.getStatus() != TicketStatus.PENDING) {
-            throw new RuntimeException("Only PENDING tickets can be cancelled by passengers");
-        }
-
-        // Check if cancellation is at least 12 hours before departure
-        if (ticket.getTrip() != null && ticket.getTrip().getDepartureTime() != null) {
-            LocalDateTime departureTime = ticket.getTrip().getDepartureTime();
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime cutoffTime = departureTime.minusHours(12);
-            
-            if (now.isAfter(cutoffTime)) {
-                throw new RuntimeException("Tickets can only be cancelled at least 12 hours before departure. " +
-                        "Departure time: " + departureTime + ", Current time: " + now);
-            }
-        }
-
-        // Update ticket status to CANCELLED
-        ticket.setStatus(TicketStatus.CANCELLED);
-
-        // Release seat back to AVAILABLE
-        if (ticket.getSeat() != null) {
-            Seat seat = ticket.getSeat();
-            seat.setStatus(SeatStatus.AVAILABLE);
-            seat.setLockedUntil(null); // Clear any temporary lock
-            seatRepository.save(seat);
-        }
-
-        return ticketRepository.save(ticket);
     }
 }

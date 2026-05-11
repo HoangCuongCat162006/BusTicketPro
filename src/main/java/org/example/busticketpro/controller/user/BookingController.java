@@ -2,9 +2,10 @@ package org.example.busticketpro.controller.user;
 
 import lombok.RequiredArgsConstructor;
 import org.example.busticketpro.dto.BookingRequest;
+import org.example.busticketpro.dto.BookingResponseDto;
 import org.example.busticketpro.dto.SeatMapDto;
 import org.example.busticketpro.dto.TripResponseDto;
-import org.example.busticketpro.entity.Ticket;
+import org.example.busticketpro.entity.*;
 import org.example.busticketpro.exception.SeatAlreadyBookedException;
 import org.example.busticketpro.repository.LocationRepository;
 import org.example.busticketpro.service.BookingService;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.example.busticketpro.entity.Bus;
+import org.example.busticketpro.entity.Route;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -94,11 +97,44 @@ public class BookingController {
     public ResponseEntity<?> bookTicket(@RequestBody BookingRequest request) {
         try {
             Ticket ticket = bookingService.processBooking(request);
-            return ResponseEntity.ok(ticket);
+
+            // === SỬA Ở ĐÂY: Chuyển sang DTO thay vì trả Entity ===
+            BookingResponseDto response = convertToBookingResponse(ticket);
+
+            return ResponseEntity.ok(response);
+
         } catch (SeatAlreadyBookedException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Đặt vé thất bại: " + e.getMessage());
         }
+    }
+
+    // Helper method chuyển Entity sang DTO
+    private BookingResponseDto convertToBookingResponse(Ticket ticket) {
+        Trip trip = ticket.getTrip();
+        Seat seat = ticket.getSeat();
+        Bus bus = trip.getBus();           // giả sử Trip có Bus
+        Route route = trip.getRoute();     // giả sử Trip có Route
+
+        return BookingResponseDto.builder()
+                .ticketId(ticket.getId())
+                .ticketCode(ticket.getTicketCode())
+                .passengerName(ticket.getPassengerName())
+                .passengerPhone(ticket.getPassengerPhone())
+                .passengerEmail(ticket.getPassengerEmail())
+                .totalPrice(ticket.getTotalPrice())
+                .status(ticket.getStatus().name())
+                .tripId(trip.getId())
+                .departurePoint(route.getDeparture().getName())   // điều chỉnh tên field nếu khác
+                .destination(route.getArrival().getName())
+                .departureTime(trip.getDepartureTime())
+                .licensePlate(bus.getLicensePlate())
+                .busType(bus.getBusType())
+                .seatNumber(seat.getSeatNumber())
+                .floor(seat.getFloor())
+                .bookedAt(ticket.getBookedAt())
+                .lockedUntil(seat.getLockedUntil())
+                .build();
     }
 }

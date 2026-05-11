@@ -10,12 +10,15 @@ import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+    List<Ticket> findAllByOrderByStatusAscBookedAtDesc();
+    Optional<Ticket> findByIdAndUserId(Long ticketId, Long userId);
 
     // Tìm theo mã vé
     Optional<Ticket> findByTicketCode(String ticketCode);
 
     // Vé của user
     List<Ticket> findByUserId(Long userId);
+
 
     // Vé theo trạng thái
     List<Ticket> findByStatus(TicketStatus status);
@@ -31,4 +34,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     // Kiểm tra ghế đã có vé chưa
     boolean existsBySeatId(Long seatId);
+
 }
