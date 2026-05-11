@@ -51,8 +51,12 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/auth/login?logout=true")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/**"));
-
+                .csrf(csrf -> csrf.ignoringRequestMatchers(
+                        "/auth/**",
+                        "/booking/api/**",
+                        "/my-tickets/**",
+                        "/admin/tickets/**"
+                ));
         return http.build();
     }
 

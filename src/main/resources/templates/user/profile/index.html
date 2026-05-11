@@ -7,40 +7,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f7fa;
             min-height: 100vh;
         }
-        
+
         .navbar {
             background: white !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             padding: 15px 0;
         }
-        
+
         .navbar-brand {
             font-weight: 600;
             font-size: 20px;
             color: #2c3e50;
         }
-        
+
         .nav-link {
             color: #2c3e50;
             font-weight: 500;
             padding: 10px 20px;
         }
-        
-        .nav-link:hover {
-            color: #3498db;
-        }
-        
+
+        .nav-link:hover { color: #3498db; }
+
         .profile-card {
             background: white;
             border-radius: 8px;
@@ -49,40 +43,89 @@
             max-width: 700px;
             margin: 30px auto;
         }
-        
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 20px;
+        }
+
+        .badge-role {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-admin    { background: #e74c3c; color: white; }
+        .badge-staff    { background: #f39c12; color: white; }
+        .badge-passenger{ background: #27ae60; color: white; }
+
+        .divider {
+            border-top: 1px solid #f0f0f0;
+            margin: 20px 0;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
         .form-label {
             font-weight: 500;
             color: #34495e;
             font-size: 14px;
             margin-bottom: 8px;
         }
-        
+
         .form-control {
             border-radius: 6px;
             border: 1px solid #e0e0e0;
             padding: 10px 14px;
             font-size: 14px;
         }
-        
+
         .form-control:focus {
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
             outline: none;
         }
-        
+
+        .form-control.is-invalid { border-color: #e74c3c; }
+
+        .form-control-plaintext {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
         .btn-primary {
             background: #3498db;
             border: none;
             border-radius: 6px;
             font-weight: 500;
-            padding: 10px 20px;
+            padding: 10px 24px;
             transition: all 0.2s ease;
         }
-        
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-        
+
+        .btn-primary:hover { background: #2980b9; }
+
         .btn-logout {
             background: #e74c3c;
             border: none;
@@ -90,10 +133,19 @@
             font-weight: 500;
             padding: 8px 16px;
             transition: all 0.2s ease;
+            color: white;
+            text-decoration: none;
         }
-        
-        .btn-logout:hover {
-            background: #c0392b;
+
+        .btn-logout:hover { background: #c0392b; color: white; }
+
+        .alert { border-radius: 6px; border: none; font-size: 14px; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -106,27 +158,38 @@
         <a class="navbar-brand" href="/user/home">
             <i class="fas fa-bus"></i> Bus Ticket Pro
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/home"><i class="fas fa-home me-2"></i> Trang chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/booking"><i class="fas fa-search me-2"></i> Đặt vé</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/my-tickets"><i class="fas fa-ticket-alt me-2"></i> Vé của tôi</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/profile"><i class="fas fa-user me-2"></i> Hồ sơ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-logout ms-2" href="/login">
-                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                    <a class="nav-link" href="/user/home">
+                        <i class="fas fa-home me-1"></i> Trang chủ
                     </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/booking">
+                        <i class="fas fa-search me-1"></i> Đặt vé
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/my-tickets">
+                        <i class="fas fa-ticket-alt me-1"></i> Vé của tôi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/profile">
+                        <i class="fas fa-user me-1"></i> Hồ sơ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-logout ms-2">
+                            <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -135,31 +198,175 @@
 
 <div class="container">
     <div class="profile-card">
-        <h4 class="mb-4"><i class="fas fa-user me-2"></i> Thông tin cá nhân</h4>
-        
-        <form>
-            <div class="mb-3">
-                <label for="fullName" class="form-label">Họ tên</label>
-                <input type="text" class="form-control" id="fullName" value="Nguyễn Văn A">
+
+        <!-- Avatar & thông tin cố định -->
+        <div class="text-center mb-4">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
             </div>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" value="abc@gmail.com">
+
+            <h5 class="mb-1" th:text="${user.fullName}">Tên người dùng</h5>
+
+            <!-- Badge role -->
+            <span th:if="${user.role.name() == 'ADMIN'}"
+                  class="badge-role badge-admin">
+                <i class="fas fa-shield-alt me-1"></i> Quản trị viên
+            </span>
+            <span th:if="${user.role.name() == 'STAFF'}"
+                  class="badge-role badge-staff">
+                <i class="fas fa-id-badge me-1"></i> Nhân viên
+            </span>
+            <span th:if="${user.role.name() == 'PASSENGER'}"
+                  class="badge-role badge-passenger">
+                <i class="fas fa-user me-1"></i> Hành khách
+            </span>
+
+            <div class="info-row justify-content-center mt-2">
+                <i class="fas fa-user-circle"></i>
+                <span th:text="${user.username}">username</span>
+                &nbsp;|&nbsp;
+                <i class="fas fa-envelope"></i>
+                <span th:text="${user.email}">email</span>
             </div>
-            
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success mb-3">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger mb-3">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Form cập nhật -->
+        <p class="section-title">
+            <i class="fas fa-edit me-2"></i> Cập nhật thông tin
+        </p>
+
+        <!--
+            th:action  → Thymeleaf tự thêm CSRF token vào form → không bị block
+            th:object  → bind với UpdateProfileRequest
+        -->
+        <form th:action="@{/profile/update}"
+              th:object="${profileRequest}"
+              method="post">
+
+            <!-- Họ tên -->
             <div class="mb-3">
-                <label for="phone" class="form-label">Số điện thoại</label>
-                <input type="tel" class="form-control" id="phone" value="0123456789">
+                <label for="fullName" class="form-label">
+                    Họ và tên <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       th:field="*{fullName}"
+                       id="fullName"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                       placeholder="Nhập họ và tên">
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('fullName')}"
+                     th:errors="*{fullName}">
+                </div>
             </div>
-            
+
+            <!-- Số điện thoại -->
+            <div class="mb-3">
+                <label for="phone" class="form-label">
+                    Số điện thoại <span class="text-danger">*</span>
+                </label>
+                <input type="tel"
+                       th:field="*{phone}"
+                       id="phone"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
+                       placeholder="Nhập số điện thoại">
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('phone')}"
+                     th:errors="*{phone}">
+                </div>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div class="mb-3">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <input type="text"
+                       th:field="*{address}"
+                       id="address"
+                       class="form-control"
+                       placeholder="Nhập địa chỉ (tùy chọn)">
+            </div>
+
+            <!-- CMND / CCCD -->
+            <div class="mb-4">
+                <label for="identityCard" class="form-label">CMND / CCCD</label>
+                <input type="text"
+                       th:field="*{identityCard}"
+                       id="identityCard"
+                       class="form-control"
+                       placeholder="Nhập số CMND hoặc CCCD (tùy chọn)">
+            </div>
+
+            <!-- Thông tin không thể thay đổi (chỉ hiển thị) -->
+            <div class="divider"></div>
+            <p class="section-title text-muted" style="font-size: 13px;">
+                <i class="fas fa-lock me-1"></i>
+                Thông tin không thể thay đổi
+            </p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Tên đăng nhập</label>
+                    <div class="form-control-plaintext" th:text="${user.username}"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Email</label>
+                    <div class="form-control-plaintext" th:text="${user.email}"></div>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100">
-                <i class="fas fa-save me-2"></i> Cập nhật thông tin
+                <i class="fas fa-save me-2"></i> Lưu thay đổi
             </button>
+
         </form>
+
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Client-side validation bổ sung
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone    = document.getElementById('phone').value.trim();
+        let valid      = true;
+
+        if (fullName.length < 2 || fullName.length > 100) {
+            document.getElementById('fullName').classList.add('is-invalid');
+            valid = false;
+        }
+
+        const phoneRegex = /^0[0-9]{9,10}$/;
+        if (!phoneRegex.test(phone)) {
+            document.getElementById('phone').classList.add('is-invalid');
+            valid = false;
+        }
+
+        if (!valid) e.preventDefault();
+    });
+
+    // Xóa is-invalid khi user bắt đầu nhập lại
+    document.querySelectorAll('.form-control').forEach(function(input) {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+</script>
+
 </body>
 </html>

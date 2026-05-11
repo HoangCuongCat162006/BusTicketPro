@@ -4,6 +4,8 @@ import org.example.busticketpro.entity.Route;
 import org.example.busticketpro.entity.Trip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,4 +35,16 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
     // Theo bus
     List<Trip> findByBusId(Long busId);
+    @Query("SELECT t FROM Trip t " +
+            "WHERE t.route.departure.id = :depId " +
+            "AND t.route.arrival.id = :arrId " +
+            "AND t.departureTime >= :start " +
+            "AND t.departureTime < :end " +
+            "AND t.isActive = true")
+    List<Trip> searchTrips(
+            @Param("depId") Long depId,
+            @Param("arrId") Long arrId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

@@ -27,6 +27,12 @@ public class BusService {
 
     @Transactional
     public Bus save(Bus bus) {
+        // Kiểm tra trùng biển số khi THÊM MỚI (id == null)
+        if (bus.getId() == null) {
+            if (busRepository.existsByLicensePlate(bus.getLicensePlate())) {
+                throw new RuntimeException("Biển số xe '" + bus.getLicensePlate() + "' đã tồn tại trong hệ thống!");
+            }
+        }
         return busRepository.save(bus);
     }
 

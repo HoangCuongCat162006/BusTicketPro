@@ -7,6 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class AdminController {
 
     @GetMapping("/admin")
+    public String adminRedirect() {
+        return "redirect:/admin/dashboard";   // ← sửa: redirect thay vì trả thẳng template
+    }
+
+    // THÊM MỚI
+    @GetMapping("/admin/dashboard")
     public String adminDashboard() {
         return "admin/dashboard";
     }

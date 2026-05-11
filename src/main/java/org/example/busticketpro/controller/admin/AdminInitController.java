@@ -28,4 +28,9 @@ public class AdminInitController {
             return "Lỗi: " + e.getMessage();
         }
     }
+    @GetMapping("/init")
+    public String initPage(org.springframework.ui.Model model) {
+        model.addAttribute("message", "Dữ liệu đã được khởi tạo sẵn khi ứng dụng khởi động.");
+        return "admin/init";
+    }
 }
