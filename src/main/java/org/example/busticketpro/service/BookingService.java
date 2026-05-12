@@ -28,16 +28,18 @@ public class BookingService {
     @Transactional(rollbackFor = Exception.class)
     public Ticket processBooking(BookingRequest request) {
 
+        // =====================================================
         // 1. Lấy ghế
+        // =====================================================
         Seat seat = seatRepository.findById(request.getSeatId())
                 .orElseThrow(() ->
-                        new RuntimeException("Không tìm thấy ghế số " + request.getSeatId()));
+                        new RuntimeException("Không tìm thấy ghế"));
 
         LocalDateTime now = LocalDateTime.now();
 
         // =====================================================
-        // 2. Nếu ghế đang PENDING nhưng đã hết thời gian lock
-        // => tự động mở ghế lại
+        // 2. Nếu ghế đang PENDING nhưng đã hết hạn giữ chỗ
+        // => tự động mở lại ghế
         // =====================================================
         if (seat.getStatus() == SeatStatus.PENDING) {
 
@@ -54,16 +56,10 @@ public class BookingService {
         }
 
         // =====================================================
-        // 3. Nếu ghế đã BOOKED thật
+        // 3. Kiểm tra ghế còn trống không
         // =====================================================
-        if (seat.getStatus() == SeatStatus.BOOKED) {
-            throw new SeatAlreadyBookedException(
-                    "Ghế này đã được đặt thành công bởi người khác.");
-        }
-
-        // =====================================================
-        // 4. Nếu ghế vẫn đang bị lock hợp lệ
-        // =====================================================
+        // Nếu ghế đang PENDING nhưng lock đã hết hạn
+        // thì mở lại
         if (seat.getStatus() == SeatStatus.PENDING &&
                 seat.getLockedUntil() != null &&
                 seat.getLockedUntil().isBefore(now)) {
@@ -71,12 +67,19 @@ public class BookingService {
             seat.setStatus(SeatStatus.AVAILABLE);
             seat.setLockedUntil(null);
         }
+
         // =====================================================
-        // 5. Lấy thông tin chuyến xe
+        // 4. Lấy chuyến xe
         // =====================================================
         Trip trip = tripRepository.findById(request.getTripId())
                 .orElseThrow(() ->
                         new RuntimeException("Không tìm thấy chuyến xe"));
+
+        // =====================================================
+        // 5. Khóa ghế
+        // =====================================================
+        seat.setStatus(SeatStatus.BOOKED);
+        seat.setLockedUntil(null);
 
         // =====================================================
         // 6. Tạo vé
@@ -88,19 +91,19 @@ public class BookingService {
                 .passengerEmail(request.getPassengerEmail())
                 .userId(request.getUserId())
                 .totalPrice(trip.getPrice())
-                .status(TicketStatus.PENDING)
+                .status(TicketStatus.PAID)
                 .bookedAt(now)
                 .trip(trip)
                 .seat(seat)
                 .build();
 
         // =====================================================
-        // 7. Lock ghế lại
+        // 7. Lưu dữ liệu
         // =====================================================
         seat.setStatus(SeatStatus.BOOKED);
         seat.setLockedUntil(null);
 
-        ticket.setStatus(TicketStatus.PAID);
+        ticket.setStatus(TicketStatus.PAID);    
 
         ticketRepository.save(ticket);
         seatRepository.save(seat);
@@ -108,7 +111,14 @@ public class BookingService {
         return ticket;
     }
 
+    // =====================================================
+    // Sinh mã vé
+    // =====================================================
     private String generateTicketCode() {
-        return "BK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "BK" +
+                UUID.randomUUID()
+                        .toString()
+                        .substring(0, 8)
+                        .toUpperCase();
     }
 }

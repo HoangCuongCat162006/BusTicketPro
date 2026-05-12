@@ -8,7 +8,7 @@ import org.example.busticketpro.dto.TripResponseDto;
 import org.example.busticketpro.entity.*;
 import org.example.busticketpro.exception.SeatAlreadyBookedException;
 import org.example.busticketpro.repository.LocationRepository;
-import org.example.busticketpro.service.TicketService;
+import org.example.busticketpro.service.BookingService;
 import org.example.busticketpro.service.SeatService;
 import org.example.busticketpro.service.TripService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,7 +30,7 @@ import java.util.List;
 public class BookingController {
 
     private final SeatService        seatService;
-    private final TicketService      ticketService;
+    private final BookingService     bookingService;
     private final TripService        tripService;
     private final LocationRepository locationRepository;
 
@@ -107,7 +107,7 @@ public class BookingController {
 
             request.setUserId(userDetails.getId());   // Gắn userId vào request
 
-            Ticket ticket = ticketService.processBooking(request);
+            Ticket ticket = bookingService.processBooking(request);
             BookingResponseDto response = convertToBookingResponse(ticket);
 
             return ResponseEntity.ok(response);
